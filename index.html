@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullscreen Scratch Player</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111;
+            color: #fff;
+            overflow: hidden;
+        }
+        #setup-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            color: #855cd6; /* Scratch-like Purple */
+        }
+        .input-group {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 15px;
+            font-size: 1rem;
+            border: 2px solid #855cd6;
+            border-radius: 8px;
+            background: #222;
+            color: #fff;
+            outline: none;
+        }
+        input:focus {
+            box-shadow: 0 0 10px rgba(133, 92, 214, 0.5);
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            background-color: #855cd6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #6b40bc;
+        }
+        #error-msg {
+            color: #ff4a4a;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+        #player-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #exit-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 1px solid #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            z-index: 10;
+            display: none;
+        }
+        #exit-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        /* Show exit button on hover near top */
+        #player-container:hover #exit-btn {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- URL Input Screen -->
+    <div id="setup-container">
+        <h1>Fullscreen Scratch Player</h1>
+        <div class="input-group">
+            <input type="text" id="scratch-url" placeholder="Paste your Scratch project link here... (e.g., https://mit.edu)">
+            <button onclick="loadGame()">Play</button>
+        </div>
+        <div id="error-msg">Please enter a valid Scratch project link or ID.</div>
+    </div>
+
+    <!-- Fullscreen Player Screen -->
+    <div id="player-container">
+        <button id="exit-btn" onclick="exitFullscreen()">✕ Exit Fullscreen</button>
+        <iframe id="scratch-iframe" allowtransparency="true" allowfullscreen="true" scrolling="no"></iframe>
+    </div>
+
+    <script>
+        function loadGame() {
+            const input = document.getElementById('scratch-url').value.trim();
+            const errorMsg = document.getElementById('error-msg');
+            
+            // Regex to pull out the multi-digit numbers (the Project ID)
+            const idMatch = input.match(/\d+/);
+            
+            if (idMatch) {
+                const projectId = idMatch[0];
+                const embedUrl = `https://mit.edu{projectId}/embed`;
+                
+                // Hide input dashboard, show player
+                document.getElementById('setup-container').style.display = 'none';
+                const playerContainer = document.getElementById('player-container');
+                playerContainer.style.display = 'block';
+                
+                // Load the source into the iframe
+                document.getElementById('scratch-iframe').src = embedUrl;
+                errorMsg.style.display = 'none';
+
+                // Attempt to trigger actual browser fullscreen mode
+                if (playerContainer.requestFullscreen) {
+                    playerContainer.requestFullscreen();
+                } else if (playerContainer.webkitRequestFullscreen) { /* Safari */
+                    playerContainer.webkitRequestFullscreen();
+                } else if (playerContainer.msRequestFullscreen) { /* IE11 */
+                    playerContainer.msRequestFullscreen();
+                }
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function exitFullscreen() {
+            // Un-fullscreen the browser if it was turned on
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+            
+            // Reset the layout UI
+            document.getElementById('player-container').style.display = 'none';
+            document.getElementById('scratch-iframe').src = '';
+            document.getElementById('setup-container').style.display = 'flex';
+        }
+
+        // Listen for the Escape key to fix layout bugs if the user exits native fullscreen manually
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                // If they dropped out of browser fullscreen but are still seeing the player container
+                if(document.getElementById('player-container').style.display === 'block') {
+                    // We just keep the web wrapper open, but show the exit button permanently
+                    document.getElementById('exit-btn').style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -2,20 +2,20 @@ document.getElementById('play-btn').addEventListener('click', loadGame);
 document.getElementById('exit-btn').addEventListener('click', exitFullscreen);
 
 function loadGame() {
-    const input = document.getElementById('scratch-url').value.trim();
-    const errorMsg = document.getElementById('error-msg');
+    var input = document.getElementById('scratch-url').value.trim();
+    var errorMsg = document.getElementById('error-msg');
     
     // Find the sequence of digits (the Project ID) inside the string
-    const idMatch = input.match(/\d+/);
+    var idMatch = input.match(/\d+/);
     
     if (idMatch && idMatch[0]) {
-        // FIXED: Extract the actual string text value from index 0 of the regex match array
-        const projectId = idMatch[0];
-        const embedUrl = "https://mit.edu" + projectId + "/embed";
+        // Safe string extraction using direct text addition
+        var projectId = idMatch[0];
+        var embedUrl = "https://scratch.mit.edu/projects/" + projectId + "/embed";
         
         // Hide input interface, reveal canvas container
         document.getElementById('setup-container').style.display = 'none';
-        const playerContainer = document.getElementById('player-container');
+        var playerContainer = document.getElementById('player-container');
         playerContainer.style.display = 'block';
         
         // Assign the generated source value directly to the iframe window

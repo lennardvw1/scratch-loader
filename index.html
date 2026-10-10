@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +30,7 @@
         h1 {
             margin-bottom: 20px;
             font-size: 2.5rem;
-            color: #855cd6; /* Scratch-like Purple */
+            color: #855cd6; /* Scratch Paars */
         }
         .input-group {
             width: 100%;
@@ -99,7 +99,7 @@
         #exit-btn:hover {
             background: rgba(255, 255, 255, 0.2);
         }
-        /* Show exit button on hover near top */
+        /* Toon de sluitknop als je met de muis in de buurt van de rechterbovenhoek komt */
         #player-container:hover #exit-btn {
             display: block;
         }
@@ -107,19 +107,19 @@
 </head>
 <body>
 
-    <!-- URL Input Screen -->
+    <!-- Invoerscherm -->
     <div id="setup-container">
         <h1>Fullscreen Scratch Player</h1>
         <div class="input-group">
-            <input type="text" id="scratch-url" placeholder="Paste your Scratch project link here... (e.g., https://mit.edu)">
-            <button onclick="loadGame()">Play</button>
+            <input type="text" id="scratch-url" placeholder="Plak je Scratch link hier... (bijv. https://mit.edu)">
+            <button onclick="loadGame()">Speel</button>
         </div>
-        <div id="error-msg">Please enter a valid Scratch project link or ID.</div>
+        <div id="error-msg">Voer aankoop een geldige Scratch project link of ID in.</div>
     </div>
 
-    <!-- Fullscreen Player Screen -->
+    <!-- Volledig Scherm Speler -->
     <div id="player-container">
-        <button id="exit-btn" onclick="exitFullscreen()">✕ Exit Fullscreen</button>
+        <button id="exit-btn" onclick="exitFullscreen()">✕ Sluit Fullscreen</button>
         <iframe id="scratch-iframe" allowtransparency="true" allowfullscreen="true" scrolling="no"></iframe>
     </div>
 
@@ -128,23 +128,24 @@
             const input = document.getElementById('scratch-url').value.trim();
             const errorMsg = document.getElementById('error-msg');
             
-            // Regex to pull out the multi-digit numbers (the Project ID)
+            // Zoek naar het ID (de cijferreeks) in de link
             const idMatch = input.match(/\d+/);
             
             if (idMatch) {
+                // Pak het eerste gevonden resultaat uit de match array
                 const projectId = idMatch[0];
                 const embedUrl = `https://mit.edu{projectId}/embed`;
                 
-                // Hide input dashboard, show player
+                // Verberg invoer, toon speler
                 document.getElementById('setup-container').style.display = 'none';
                 const playerContainer = document.getElementById('player-container');
                 playerContainer.style.display = 'block';
                 
-                // Load the source into the iframe
+                // Zet de juiste URL in de iframe
                 document.getElementById('scratch-iframe').src = embedUrl;
                 errorMsg.style.display = 'none';
 
-                // Attempt to trigger actual browser fullscreen mode
+                // Probeer de echte browser fullscreen te activeren
                 if (playerContainer.requestFullscreen) {
                     playerContainer.requestFullscreen();
                 } else if (playerContainer.webkitRequestFullscreen) { /* Safari */
@@ -158,25 +159,23 @@
         }
 
         function exitFullscreen() {
-            // Un-fullscreen the browser if it was turned on
+            // Verlaat browser fullscreen als dat actief was
             if (document.exitFullscreen) {
                 document.exitFullscreen().catch(() => {});
             } else if (document.webkitExitFullscreen) {
                 document.webkitExitFullscreen();
             }
             
-            // Reset the layout UI
+            // Reset de interface naar het beginscherm
             document.getElementById('player-container').style.display = 'none';
             document.getElementById('scratch-iframe').src = '';
             document.getElementById('setup-container').style.display = 'flex';
         }
 
-        // Listen for the Escape key to fix layout bugs if the user exits native fullscreen manually
+        // Luister of de gebruiker de fullscreen handmatig verlaat (bijv. met de Escape-toets)
         document.addEventListener('fullscreenchange', () => {
             if (!document.fullscreenElement) {
-                // If they dropped out of browser fullscreen but are still seeing the player container
                 if(document.getElementById('player-container').style.display === 'block') {
-                    // We just keep the web wrapper open, but show the exit button permanently
                     document.getElementById('exit-btn').style.display = 'block';
                 }
             }
